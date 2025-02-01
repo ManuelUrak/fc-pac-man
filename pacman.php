@@ -45,6 +45,16 @@ function fc_pac_man_enqueue_scripts(){
 }
 add_action('wp_enqueue_scripts', 'fc_pac_man_enqueue_scripts');
 
+// Apply module type to the script
+
+function fc_pac_man_add_module_attribute($tag, $handle) {
+    if ($handle === 'fc_pac_man') {
+        return str_replace('<script ', '<script type="module" ', $tag);
+    }
+    return $tag;
+}
+add_filter('script_loader_tag', 'fc_pac_man_add_module_attribute', 10, 2);
+
 //Create a shortcode to display the game
 
 function fc_pac_man_shortcode(){
