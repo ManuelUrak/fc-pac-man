@@ -18,9 +18,9 @@ export default class Pacman {
 
     this.pacmanRotation = this.Rotation.right;
 
-    this.wakaSound = new Audio("../sounds/waka.wav");
-    this.powerDotSound = new Audio("../sounds/power_dot.wav");
-    this.eatGhostSound = new Audio("../sounds/eat_ghost.wav");
+    this.wakaSound = new Audio(`${fcPacMan.sounds}waka.wav`);
+    this.powerDotSound = new Audio(`${fcPacMan.sounds}power_dot.wav`);
+    this.eatGhostSound = new Audio(`${fcPacMan.sounds}eat_ghost.wav`);
 
     this.powerDotActive = false;
     this.powerDotAboutToExpire = false;
@@ -79,16 +79,16 @@ export default class Pacman {
 
   #loadPacmanImages() {
     const pacmanImage1 = new Image();
-    pacmanImage1.src = "../imgs/pac0.png";
+    pacmanImage1.src = `${fcPacMan.imgs}pac0.png`;
 
     const pacmanImage2 = new Image();
-    pacmanImage2.src = "../imgs/pac1.png";
+    pacmanImage2.src = `${fcPacMan.imgs}pac1.png`;
 
     const pacmanImage3 = new Image();
-    pacmanImage3.src = "../imgs/pac2.png";
+    pacmanImage3.src = `${fcPacMan.imgs}pac2.png`;
 
     const pacmanImage4 = new Image();
-    pacmanImage4.src = "../imgs/pac1.png";
+    pacmanImage4.src = `${fcPacMan.imgs}pac1.png`;
 
     this.pacmanImages = [
       pacmanImage1,

@@ -12,17 +12,17 @@ export default class TileMap {
     //Getting the asset for the walls
 
     this.wall = new Image();
-    this.wall.src = "../imgs/wall.png";
+    this.wall.src = `${fcPacMan.imgs}wall.png`;
 
     //Getting the asset for the yellow dots
 
     this.yellowDot = new Image();
-    this.yellowDot.src = "../imgs/yellowDot.png";
+    this.yellowDot.src = `${fcPacMan.imgs}yellowDot.png`;
 
     //Getting the asset for the pink dots
 
     this.pinkDot = new Image();
-    this.pinkDot.src = "../imgs/pinkDot.png";
+    this.pinkDot.src = `${fcPacMan.imgs}pinkDot.png`;
 
     this.powerDot = this.pinkDot;
     this.powerDotAnimationTimerDefault = 30;

@@ -11,8 +11,8 @@ pacman.onPowerDotEaten = onPowerDotEaten;
 pacman.onGhostEaten = onGhostEaten;
 let enemies = tileMap.getEnemies(velocity);
 
-const gameOverSound = new Audio("../sounds/gameOver.wav");
-const gameWinSound = new Audio("../sounds/gameWin.wav");
+const gameOverSound = new Audio(`${fcPacMan.sounds}gameOver.wav`);
+const gameWinSound = new Audio(`${fcPacMan.sounds}gameWin.wav`);
 
 let gameOver = false;
 let gameWin = false;

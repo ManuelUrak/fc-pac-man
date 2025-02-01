@@ -58,6 +58,9 @@ add_filter('script_loader_tag', 'fc_pac_man_add_module_attribute', 10, 2);
 //Create a shortcode to display the game
 
 function fc_pac_man_shortcode(){
+    global $shortcode_rendered;
+    $shortcode_rendered = true;
+
     return '
         <div id="game-container">
             <h1>Pac Man</h1>
@@ -78,4 +81,30 @@ function fc_pac_man_shortcode(){
     ';
 }
 add_shortcode('pacman_game', 'fc_pac_man_shortcode');
+
+// Check if the shortcode is present in the post content
+
+function fc_pac_man_check_for_shortcode() {
+    global $post;
+    global $shortcode_rendered;
+
+    // Check if the current post contains the shortcode
+    if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'pacman_game')) {
+        $shortcode_rendered = true;
+    }
+}
+add_action('template_redirect', 'fc_pac_man_check_for_shortcode');
+
+// Add a class to the body tag if the shortcode is rendered
+
+function fc_pac_man_add_body_class($classes) {
+    global $shortcode_rendered;
+
+    if (isset($shortcode_rendered) && $shortcode_rendered) {
+        $classes[] = 'pac-man';
+    }
+
+    return $classes;
+}
+add_filter('body_class', 'fc_pac_man_add_body_class');
 
