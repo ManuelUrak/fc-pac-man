@@ -213,11 +213,27 @@ function saveHighScore() {
     const playerName = playerNameInput.value.trim();
 
     if (playerName) {
-      const highScores = JSON.parse(localStorage.getItem("highScores")) || [];
-      highScores.push({ name: playerName, score: score });
-      highScores.sort((a, b) => b.score - a.score);
-      localStorage.setItem("highScores", JSON.stringify(highScores));
-      renderHighScores();
+      // Send the high score to the server
+      fetch(fcPacMan.ajax_url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `action=fc_pac_man_save_highscore&player_name=${encodeURIComponent(
+          playerName
+        )}&score=${score}&_ajax_nonce=${fcPacMan.nonce}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            renderHighScores();
+          } else {
+            alert("Failed to save high score.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
 
       modal.style.display = "none";
       playerNameInput.value = "";
@@ -230,14 +246,31 @@ function saveHighScore() {
 // Render the highscores to the HTML
 
 function renderHighScores() {
-  const highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+  // Retrieve high scores from the server
+  fetch(
+    fcPacMan.ajax_url +
+      `?action=fc_pac_man_get_highscores&_ajax_nonce=${fcPacMan.nonce}`
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        const highScoresElement = document.getElementById("high-scores");
+        highScoresElement.innerHTML = "<h2>Highscores</h2>";
 
-  highScoresElement.innerHTML = "<h2>Highscores</h2>";
-  highScores.forEach((entry, index) => {
-    const scoreEntry = document.createElement("div");
-    scoreEntry.textContent = `${index + 1}. ${entry.name}: ${entry.score}`;
-    highScoresElement.appendChild(scoreEntry);
-  });
+        data.data.forEach((entry, index) => {
+          const scoreEntry = document.createElement("div");
+          scoreEntry.textContent = `${index + 1}. ${entry.player_name}: ${
+            entry.score
+          }`;
+          highScoresElement.appendChild(scoreEntry);
+        });
+      } else {
+        console.error("Failed to retrieve high scores.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 // Attach scoring callbacks to Pac-Man
