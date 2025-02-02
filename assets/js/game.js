@@ -56,7 +56,9 @@ function checkGameWin() {
     gameWin = tileMap.didWin();
 
     if (gameWin) {
-      gameWinSound.play();
+      if (fcPacMan.sound_enabled) {
+        gameWinSound.play();
+      }
 
       if (tileMap.currentLevel === tileMap.maps.length - 1) {
         saveHighScore();
@@ -72,7 +74,10 @@ function checkGameOver() {
     gameOver = isGameOver();
 
     if (gameOver) {
-      gameOverSound.play();
+      if (fcPacMan.sound_enabled) {
+        gameOverSound.play();
+      }
+
       saveHighScore();
     }
   }

@@ -210,7 +210,9 @@ export default class Pacman {
 
   #eatDot() {
     if (this.tileMap.eatDot(this.x, this.y) && this.madeFirstMove) {
-      this.wakaSound.play();
+      if (fcPacMan.sound_enabled) {
+        this.wakaSound.play();
+      }
 
       if (this.onDotEaten) {
         this.onDotEaten();
@@ -222,7 +224,10 @@ export default class Pacman {
 
   #eatPowerDot() {
     if (this.tileMap.eatPowerDot(this.x, this.y)) {
-      this.powerDotSound.play();
+      if (fcPacMan.sound_enabled) {
+        this.powerDotSound.play();
+      }
+
       this.powerDotActive = true;
       this.powerDotAboutToExpire = false;
       this.timers.forEach((timer) => clearTimeout(timer));
@@ -255,7 +260,9 @@ export default class Pacman {
 
       collideEnemies.forEach((enemy) => {
         enemies.splice(enemies.indexOf(enemy), 1);
-        this.eatGhostSound.play();
+        if (fcPacMan.sound_enabled) {
+          this.eatGhostSound.play();
+        }
 
         if (this.onGhostEaten) {
           this.onGhostEaten();
