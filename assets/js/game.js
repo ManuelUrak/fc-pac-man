@@ -1,295 +1,300 @@
 import TileMap from "./tilemap.js";
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const tileSize = 32;
-let tileMap = new TileMap(tileSize);
-const velocity = 2;
-let pacman = tileMap.getPacman(velocity);
-pacman.onDotEaten = onDotEaten;
-pacman.onPowerDotEaten = onPowerDotEaten;
-pacman.onGhostEaten = onGhostEaten;
-let enemies = tileMap.getEnemies(velocity);
+document.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.getElementById("gameCanvas");
 
-const gameOverSound = new Audio(`${fcPacMan.sounds}gameOver.wav`);
-const gameWinSound = new Audio(`${fcPacMan.sounds}gameWin.wav`);
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    const tileSize = 32;
+    let tileMap = new TileMap(tileSize);
+    const velocity = 2;
+    let pacman = tileMap.getPacman(velocity);
+    pacman.onDotEaten = onDotEaten;
+    pacman.onPowerDotEaten = onPowerDotEaten;
+    pacman.onGhostEaten = onGhostEaten;
+    let enemies = tileMap.getEnemies(velocity);
 
-let gameOver = false;
-let gameWin = false;
+    const gameOverSound = new Audio(`${fcPacMan.sounds}gameOver.wav`);
+    const gameWinSound = new Audio(`${fcPacMan.sounds}gameWin.wav`);
 
-let score = 0;
+    let gameOver = false;
+    let gameWin = false;
 
-const scoreElement = document.getElementById("score");
-const levelElement = document.getElementById("level");
+    let score = 0;
 
-const highScoresElement = document.getElementById("high-scores");
+    const scoreElement = document.getElementById("score");
+    const levelElement = document.getElementById("level");
 
-// Game loop
+    const highScoresElement = document.getElementById("high-scores");
 
-function gameLoop() {
-  tileMap.draw(ctx);
-  drawGameEnd();
-  pacman.draw(ctx, pause(), enemies);
-  enemies.forEach((enemy) => enemy.draw(ctx, pause(), pacman));
-  checkGameOver();
-  checkGameWin();
-  updateScoreDisplay();
-  updateLevelDisplay();
-}
+    // Game loop
 
-// Update the score display
-
-function updateScoreDisplay() {
-  scoreElement.textContent = `Score: ${score}`;
-}
-
-// Update the level display
-
-function updateLevelDisplay() {
-  levelElement.textContent = `Level: ${tileMap.currentLevel + 1}`;
-}
-
-// Check if the game is won and if the player cleared all levels
-
-function checkGameWin() {
-  if (!gameWin) {
-    gameWin = tileMap.didWin();
-
-    if (gameWin) {
-      if (fcPacMan.sound_enabled) {
-        gameWinSound.play();
-      }
-
-      if (tileMap.currentLevel === tileMap.maps.length - 1) {
-        saveHighScore();
-      }
-    }
-  }
-}
-
-// Check if the game is over
-
-function checkGameOver() {
-  if (!gameOver) {
-    gameOver = isGameOver();
-
-    if (gameOver) {
-      if (fcPacMan.sound_enabled) {
-        gameOverSound.play();
-      }
-
-      saveHighScore();
-    }
-  }
-}
-
-// Display text when the game is won or over
-
-function drawGameEnd() {
-  if (gameOver || gameWin) {
-    let text = gameWin ? "Level Clear!" : "Game Over!";
-    let subText = "";
-
-    if (gameWin) {
-      if (tileMap.currentLevel === tileMap.maps.length - 1) {
-        text = "Congratulations!";
-        subText = "You've cleared all levels. Press Space to restart.";
-      } else {
-        subText = "Press Space to Proceed";
-      }
-    } else if (gameOver) {
-      subText = "Press Space to Restart";
+    function gameLoop() {
+      tileMap.draw(ctx);
+      drawGameEnd();
+      pacman.draw(ctx, pause(), enemies);
+      enemies.forEach((enemy) => enemy.draw(ctx, pause(), pacman));
+      checkGameOver();
+      checkGameWin();
+      updateScoreDisplay();
+      updateLevelDisplay();
     }
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, canvas.height / 3.2, canvas.width, 120);
+    // Update the score display
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    ctx.font = "80px comic sans";
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    gradient.addColorStop("0", "magenta");
-    gradient.addColorStop("0.5", "blue");
-    gradient.addColorStop("1.0", "red");
-
-    ctx.fillStyle = gradient;
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2 - 20);
-
-    ctx.font = "30px comic sans";
-    ctx.fillStyle = "white";
-    ctx.fillText(subText, canvas.width / 2, canvas.height / 2 + 40);
-  }
-}
-
-// Define game over
-
-function isGameOver() {
-  return enemies.some(
-    (enemy) => !pacman.powerDotActive && enemy.collideWith(pacman)
-  );
-}
-
-// Pause the game if it's over or won
-
-function pause() {
-  return !pacman.madeFirstMove || gameOver || gameWin;
-}
-
-// Attach scoring callbacks to Pac-Man
-
-function attachScoringCallbacks() {
-  pacman.onDotEaten = onDotEaten;
-  pacman.onPowerDotEaten = onPowerDotEaten;
-  pacman.onGhostEaten = onGhostEaten;
-}
-
-// Reset the game state
-
-function resetGame() {
-  tileMap = new TileMap(tileSize);
-  pacman = tileMap.getPacman(velocity);
-  enemies = tileMap.getEnemies(velocity);
-  gameOver = false;
-  gameWin = false;
-  score = 0;
-  attachScoringCallbacks();
-}
-
-// Progress to the next level
-
-function nextLevel() {
-  tileMap.loadNextLevel();
-  pacman = tileMap.getPacman(velocity);
-  enemies = tileMap.getEnemies(velocity);
-  gameOver = false;
-  gameWin = false;
-
-  if (tileMap.currentLevel === 0) {
-    score = 0;
-  }
-
-  attachScoringCallbacks();
-}
-
-// Listen for spacebar to restart or progress to the next level
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === " ") {
-    if (gameOver) {
-      resetGame();
-    } else if (gameWin) {
-      nextLevel();
+    function updateScoreDisplay() {
+      scoreElement.textContent = `Score: ${score}`;
     }
-  }
-});
 
-// Update the score when Pac-Man eats a dot
+    // Update the level display
 
-function onDotEaten() {
-  score += 10;
-  updateScoreDisplay();
-}
+    function updateLevelDisplay() {
+      levelElement.textContent = `Level: ${tileMap.currentLevel + 1}`;
+    }
 
-// Update the score when Pac-Man eats a power dot
+    // Check if the game is won and if the player cleared all levels
 
-function onPowerDotEaten() {
-  score += 50;
-  updateScoreDisplay();
-}
+    function checkGameWin() {
+      if (!gameWin) {
+        gameWin = tileMap.didWin();
 
-// Update the score when Pac-Man eats a Ghost
+        if (gameWin) {
+          if (fcPacMan.sound_enabled) {
+            gameWinSound.play();
+          }
 
-function onGhostEaten() {
-  score += 100;
-  updateScoreDisplay();
-}
+          if (tileMap.currentLevel === tileMap.maps.length - 1) {
+            saveHighScore();
+          }
+        }
+      }
+    }
 
-// Save the highscore
+    // Check if the game is over
 
-function saveHighScore() {
-  const modal = document.getElementById("custom-prompt");
-  const playerNameInput = document.getElementById("player-name");
-  const submitButton = document.getElementById("submit-name");
+    function checkGameOver() {
+      if (!gameOver) {
+        gameOver = isGameOver();
 
-  modal.style.display = "flex";
+        if (gameOver) {
+          if (fcPacMan.sound_enabled) {
+            gameOverSound.play();
+          }
 
-  submitButton.onclick = () => {
-    const playerName = playerNameInput.value.trim();
+          saveHighScore();
+        }
+      }
+    }
 
-    if (playerName) {
-      // Send the high score to the server
-      fetch(fcPacMan.ajax_url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `action=fc_pac_man_save_highscore&player_name=${encodeURIComponent(
-          playerName
-        )}&score=${score}&_ajax_nonce=${fcPacMan.nonce}`,
-      })
+    // Display text when the game is won or over
+
+    function drawGameEnd() {
+      if (gameOver || gameWin) {
+        let text = gameWin ? "Level Clear!" : "Game Over!";
+        let subText = "";
+
+        if (gameWin) {
+          if (tileMap.currentLevel === tileMap.maps.length - 1) {
+            text = "Congratulations!";
+            subText = "You've cleared all levels. Press Space to restart.";
+          } else {
+            subText = "Press Space to Proceed";
+          }
+        } else if (gameOver) {
+          subText = "Press Space to Restart";
+        }
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, canvas.height / 3.2, canvas.width, 120);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.font = "80px comic sans";
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop("0", "magenta");
+        gradient.addColorStop("0.5", "blue");
+        gradient.addColorStop("1.0", "red");
+
+        ctx.fillStyle = gradient;
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2 - 20);
+
+        ctx.font = "30px comic sans";
+        ctx.fillStyle = "white";
+        ctx.fillText(subText, canvas.width / 2, canvas.height / 2 + 40);
+      }
+    }
+
+    // Define game over
+
+    function isGameOver() {
+      return enemies.some(
+        (enemy) => !pacman.powerDotActive && enemy.collideWith(pacman)
+      );
+    }
+
+    // Pause the game if it's over or won
+
+    function pause() {
+      return !pacman.madeFirstMove || gameOver || gameWin;
+    }
+
+    // Attach scoring callbacks to Pac-Man
+
+    function attachScoringCallbacks() {
+      pacman.onDotEaten = onDotEaten;
+      pacman.onPowerDotEaten = onPowerDotEaten;
+      pacman.onGhostEaten = onGhostEaten;
+    }
+
+    // Reset the game state
+
+    function resetGame() {
+      tileMap = new TileMap(tileSize);
+      pacman = tileMap.getPacman(velocity);
+      enemies = tileMap.getEnemies(velocity);
+      gameOver = false;
+      gameWin = false;
+      score = 0;
+      attachScoringCallbacks();
+    }
+
+    // Progress to the next level
+
+    function nextLevel() {
+      tileMap.loadNextLevel();
+      pacman = tileMap.getPacman(velocity);
+      enemies = tileMap.getEnemies(velocity);
+      gameOver = false;
+      gameWin = false;
+
+      if (tileMap.currentLevel === 0) {
+        score = 0;
+      }
+
+      attachScoringCallbacks();
+    }
+
+    // Listen for spacebar to restart or progress to the next level
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === " ") {
+        if (gameOver) {
+          resetGame();
+        } else if (gameWin) {
+          nextLevel();
+        }
+      }
+    });
+
+    // Update the score when Pac-Man eats a dot
+
+    function onDotEaten() {
+      score += 10;
+      updateScoreDisplay();
+    }
+
+    // Update the score when Pac-Man eats a power dot
+
+    function onPowerDotEaten() {
+      score += 50;
+      updateScoreDisplay();
+    }
+
+    // Update the score when Pac-Man eats a Ghost
+
+    function onGhostEaten() {
+      score += 100;
+      updateScoreDisplay();
+    }
+
+    // Save the highscore
+
+    function saveHighScore() {
+      const modal = document.getElementById("custom-prompt");
+      const playerNameInput = document.getElementById("player-name");
+      const submitButton = document.getElementById("submit-name");
+
+      modal.style.display = "flex";
+
+      submitButton.onclick = () => {
+        const playerName = playerNameInput.value.trim();
+
+        if (playerName) {
+          // Send the high score to the server
+          fetch(fcPacMan.ajax_url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `action=fc_pac_man_save_highscore&player_name=${encodeURIComponent(
+              playerName
+            )}&score=${score}&_ajax_nonce=${fcPacMan.nonce}`,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                renderHighScores();
+              } else {
+                alert("Failed to save high score.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+
+          modal.style.display = "none";
+          playerNameInput.value = "";
+        } else {
+          alert("Please enter your name!");
+        }
+      };
+    }
+
+    // Render the highscores to the HTML
+
+    function renderHighScores() {
+      // Retrieve high scores from the server
+      fetch(
+        fcPacMan.ajax_url +
+          `?action=fc_pac_man_get_highscores&_ajax_nonce=${fcPacMan.nonce}`
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            renderHighScores();
+            const highScoresElement = document.getElementById("high-scores");
+            highScoresElement.innerHTML = "<h2>Highscores</h2>";
+
+            data.data.forEach((entry, index) => {
+              const scoreEntry = document.createElement("div");
+              scoreEntry.textContent = `${index + 1}. ${entry.player_name}: ${
+                entry.score
+              }`;
+              highScoresElement.appendChild(scoreEntry);
+            });
           } else {
-            alert("Failed to save high score.");
+            console.error("Failed to retrieve high scores.");
           }
         })
         .catch((error) => {
           console.error("Error:", error);
         });
-
-      modal.style.display = "none";
-      playerNameInput.value = "";
-    } else {
-      alert("Please enter your name!");
     }
-  };
-}
 
-// Render the highscores to the HTML
+    // Attach scoring callbacks to Pac-Man
 
-function renderHighScores() {
-  // Retrieve high scores from the server
-  fetch(
-    fcPacMan.ajax_url +
-      `?action=fc_pac_man_get_highscores&_ajax_nonce=${fcPacMan.nonce}`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        const highScoresElement = document.getElementById("high-scores");
-        highScoresElement.innerHTML = "<h2>Highscores</h2>";
+    attachScoringCallbacks();
 
-        data.data.forEach((entry, index) => {
-          const scoreEntry = document.createElement("div");
-          scoreEntry.textContent = `${index + 1}. ${entry.player_name}: ${
-            entry.score
-          }`;
-          highScoresElement.appendChild(scoreEntry);
-        });
-      } else {
-        console.error("Failed to retrieve high scores.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-}
+    // Render highscores on page load
 
-// Attach scoring callbacks to Pac-Man
+    renderHighScores();
 
-attachScoringCallbacks();
+    // Set canvas size
 
-// Render highscores on page load
+    tileMap.setCanvasSize(canvas);
 
-renderHighScores();
+    // Run the game at 75fps
 
-// Set canvas size
-
-tileMap.setCanvasSize(canvas);
-
-// Run the game at 75fps
-
-setInterval(gameLoop, 1000 / 75);
+    setInterval(gameLoop, 1000 / 75);
+  }
+});
