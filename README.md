@@ -14,6 +14,10 @@ Feel free to fork this, edit the code, expand the project or sending me pull req
 
 ## Changelog
 
+[1.0.2] - 2025-02-05
+
+    Fixed a console error that was caused by the game logic trying to run before the DOM was loaded.
+
 [1.0.1] - 2025-02-03
 
     Fixed a bug that made the game freeze after completing level 5.
